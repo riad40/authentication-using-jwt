@@ -1,6 +1,2 @@
-######################
-## EPiServer Files
-######################
-*License.config
 node_modules
 *env
