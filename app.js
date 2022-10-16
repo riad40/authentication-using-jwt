@@ -2,7 +2,7 @@ require('dotenv').config()
 const db = require('./config/config_db')
 const mongoose = require('mongoose')
 const express = require('express')
-
+const errorHandler = require('./middlwares/errorHandler')
 
 const app = express()
 
@@ -20,6 +20,8 @@ app.use('/api/user/manager', managerRouter)
 app.use('/api/user/customer', customerRouter)
 app.use('/api/user/delivery', deliveryRouter)
 
+// error handler
+app.use(errorHandler)
     
 const port = process.env.PORT
 
