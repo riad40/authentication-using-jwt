@@ -1,6 +1,5 @@
 require('dotenv').config()
 const db = require('./config/config_db')
-const mongoose = require('mongoose')
 const express = require('express')
 const errorHandler = require('./middlwares/errorHandler')
 
@@ -22,7 +21,7 @@ app.use('/api/user/delivery', deliveryRouter)
 
 // error handler
 app.use(errorHandler)
-    
+
 const port = process.env.PORT
 
 app.listen(port, (err) => {

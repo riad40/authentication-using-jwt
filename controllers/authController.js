@@ -1,21 +1,26 @@
+const User = require('../models/User')
+const Role = require('../models/UsersRole')
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
+const nodemailer = require('nodemailer')
+// const { token } = require('morgan')
+
 // method : post
 // URL: api/auth/login
-
-// const errorHandler = require("../middlwares/errorHandler")
-
 // access : public
-exports.login = (req, res, next) => {
-    req.body.username !== '' && req.body.password !== '' ? req.body.username == 'root' && req.body.password == 'root' ? res.send(
-        next({ 
-            status: 200, 
-            message: 'Athenticated succefully' 
-        })
+exports.login = async (req, res, next) => {
+
+    const user = await User.findOne({email: req.body.email})
+    const token = jwt.sign(user._id , process.env.JWT_SECRET)
+
+    req.body.username !== '' && req.body.password !== '' ? user && await bcrypt.compare(req.body.password, user.password) ? res.send(
+        { token, user }
     ): res.send(
         next({ 
             status: 400, 
             message: 'Credintials are wrong' 
         })
-    ) : res.send(
+    ):  res.send(
         next({ 
             status: 400, 
             message: 'All the fileds are required' 
@@ -26,14 +31,59 @@ exports.login = (req, res, next) => {
 // method : post
 // URL: api/auth/register
 // access : public
-exports.register = (req, res, next) => {
-    let emails = ['a1@gmail.com', 'a2@gmail.com', 'a3@gmail.com', 'a4@gmail.com']
-    req.body.username !== '' && req.body.email !== '' && req.body.password !== '' && req.body.repeatpassword ? req.body.password == req.body.repeatpassword ? !emails.includes(req.body.email) ? res.send(
-        next({ 
-            status: 200, 
-            message: 'Registerd succefully' 
+exports.register = async (req, res, next) => {
+    // set up the email transporter
+    const transporter = nodemailer.createTransport({
+        service: process.env.SERVICE_TRANSPORTER,
+        auth: {
+            user: process.env.EMAIL, 
+            pass: process.env.PASSWORD
+        }, 
+        tls: {
+            rejectUnauthorized: false
+        } 
+    })
+    // verify if email already taken
+    const emailTaken = await User.findOne({email: req.body.email})
+    // hash the password
+    const hashPassword = await bcrypt.hash(req.body.password, await bcrypt.genSalt(10))
+    let roles = await Role.findOne({role: req.body.role})
+    roles == null ? roles = {
+        _id: '634d5416feb86a7fa621a6ee',
+        role: "customer"
+    } : roles = roles
+    // register user method
+    const registerUser = async () => {
+        const user = new User ({
+            username: req.body.username,
+            email: req.body.email,
+            password: hashPassword,
+            role: roles._id
         })
-    ):  res.send(next({ 
+        // get roles
+        try {
+            const userRegister = await user.save()
+            // token verification
+            const token = jwt.sign({_id: user._id}, process.env.JWT_SECRET, { expiresIn: '1h' })    
+            // send verification email
+            const mailContent = {
+                from: process.env.EMAIL,
+                to: user.email,
+                subject: 'Verify Your Email',
+                html: `<h2>Hi Please Verify Your Email<a href="http://localhost:3000/api/auth/register/verify/${token}">here</a></h2>`
+            }
+            transporter.sendMail(mailContent, (err) => !err ? console.log('mail just sent to '+user.email) : console.log(err))
+            res.send({ userRegister })
+        } catch (error) {
+            res.send(next({
+                status: 400, 
+                message: "something went wrong " + error
+            }))
+        }
+    }
+    // make register
+    req.body.username !== '' && req.body.email !== '' && req.body.password !== '' && req.body.repeatpassword ? req.body.password == req.body.repeatpassword ? !emailTaken ? registerUser() 
+    :  res.send(next({ 
             status: 400, 
             message: 'Email is already taken' 
         })
@@ -43,9 +93,26 @@ exports.register = (req, res, next) => {
         })
     ):  res.send(next({ 
             status: 400, 
-            message: 'All the fileds are required' 
+            message: 'All the fileds are required',
         })
     )
+}
+
+// method : post
+// URL: api/auth/register/verify/:token
+// access : public
+exports.verifyEmail = async (req, res) => {
+    const token = req.params.token
+    const userData = jwt.verify(token, process.env.JWT_SECRET)
+    const userId = userData._id
+    userData.emailIsValid == true ? res.send('email already valide') :
+    User.updateOne({_id: userId}, { $set: { emailIsValid: true } })
+        .then(() => {
+            res.send('email verified succefully') && console.log('email verified succefully')
+        }).catch((err)=> {
+            console.log(err) && res.send('something went wrong '+err)
+        
+    })
 }
 
 // method : post
