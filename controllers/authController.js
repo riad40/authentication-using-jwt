@@ -11,11 +11,23 @@ const nodemailer = require('nodemailer')
 exports.login = async (req, res, next) => {
 
     const user = await User.findOne({email: req.body.email})
-    const token = jwt.sign(user._id , process.env.JWT_SECRET)
+    const token = jwt.sign({_id: user._id } , process.env.JWT_SECRET, { expiresIn: '24h' })
+    // console.log(token)
+    // sent user to route dependsnon the role 
+    const role = await Role.findOne({_id: user.role[0]})
 
-    req.body.username !== '' && req.body.password !== '' ? user && await bcrypt.compare(req.body.password, user.password) ? res.send(
-        { token, user }
-    ): res.send(
+    req.body.username !== '' && req.body.password !== '' ? 
+    user.email && await bcrypt.compare(req.body.password, user.password) ? 
+    user.emailIsValid == false ? 
+    res.send(
+        next({
+            status: 400, 
+            message: 'Email is not validated' 
+        })
+    ):  res
+            .cookie('access-token', token)
+            .send(`Hi ${user.username} u've just authenticated succefully`)
+    :  res.send(
         next({ 
             status: 400, 
             message: 'Credintials are wrong' 
@@ -83,7 +95,7 @@ exports.register = async (req, res, next) => {
     }
     // make register
     req.body.username !== '' && req.body.email !== '' && req.body.password !== '' && req.body.repeatpassword ? req.body.password == req.body.repeatpassword ? !emailTaken ? registerUser() 
-    :  res.send(next({ 
+    :   res.send(next({ 
             status: 400, 
             message: 'Email is already taken' 
         })
@@ -105,7 +117,8 @@ exports.verifyEmail = async (req, res) => {
     const token = req.params.token
     const userData = jwt.verify(token, process.env.JWT_SECRET)
     const userId = userData._id
-    userData.emailIsValid == true ? res.send('email already valide') :
+    const allUserData = await User.findOne({_id: userId})
+    allUserData.emailIsValid == true ? res.send('email already valide') :
     User.updateOne({_id: userId}, { $set: { emailIsValid: true } })
         .then(() => {
             res.send('email verified succefully') && console.log('email verified succefully')
