@@ -131,40 +131,90 @@ exports.verifyEmail = async (req, res) => {
 // method : post
 // URL: api/auth/forgetpassword
 // access : public
-exports.forgetPassword = (req, res, next) => {
-    req.body.email !== '' ? res.send(
-        next({ 
-            status: 200, 
-            message: 'A reset password mail has been sent to your inbox' 
-        })
-    ):  res.send(
-        next({ 
-            status: 400, 
-            message: 'email is required' 
-        })
-    )
+exports.forgetPassword = async (req, res, next) => {
+    // set up the email transporter
+    const transporter = nodemailer.createTransport({
+        service: process.env.SERVICE_TRANSPORTER,
+        auth: {
+            user: process.env.EMAIL, 
+            pass: process.env.PASSWORD
+        }, 
+        tls: {
+            rejectUnauthorized: false
+        } 
+    })
+
+    if(req.body.email !== '') {
+        const user = await User.findOne({email: req.body.email})
+        // generate token
+        const token = jwt.sign({_id: user._id } , process.env.JWT_SECRET, { expiresIn: '24h' })
+        // send verification email
+        const mailContent = {
+            from: process.env.EMAIL,
+            to: user.email,
+            subject: 'Reset Password',
+            html: `<h2>Hi Please Verify Your Email<a href="http://localhost:3000/api/auth/resetPassword/${token}">here</a></h2>`
+        }
+        transporter.sendMail(mailContent, (err) => !err ? console.log('a reset password mail just sent to '+user.email) : console.log(err))
+        res.send(
+            next({ 
+                status: 200, 
+                message: 'A reset password mail has been sent to your inbox' 
+            })
+        )
+    }
+    else {
+        res.send(
+            next({ 
+                status: 400, 
+                message: 'email is required' 
+            })
+        )
+    }
 }
 
 // method : post
 // URL: api/auth/resetpassword
 // access : public
-exports.resetPassword = (req, res, next) => {
-    req.body.newpassword !== '' && req.body.repeatpassword !== '' ? req.body.newpassword == req.body.repeatpassword ? res.send(
-        next({ 
-            status: 200, 
-            message: 'New password has been created succuefully' 
+exports.resetPassword = async (req, res, next) => {
+
+    if(req.body.newpassword !== '' && req.body.repeatpassword !== '') {
+
+        if (req.body.newpassword !== req.body.repeatpassword) {  
+            res.send(
+                next({ 
+                    status: 400, 
+                    message: 'Passwords dosent match' 
+                })
+            )
+        }
+
+        const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MzUxZTVmNWFhMTZhZjZlOTRhOGJiYTkiLCJpYXQiOjE2NjYzMTI2NjgsImV4cCI6MTY2NjM5OTA2OH0.RIVIpAGQ9vABov2pBY3yZb5afFoUM5VG0pIQvQ0yAxo'
+        const userData = jwt.verify(token, process.env.JWT_SECRET)
+        const userId = userData._id
+        const pwd = await bcrypt.hash(req.body.newpassword, await bcrypt.genSalt(10))
+        User.updateOne({_id: userId}, { $set: { password: pwd} })
+            .then(() => {
+                res.send('Password Updated Succefully') && console.log('Password Updated Succefully')
+            }).catch((err)=> {
+                console.log(err) && res.send('something went wrong '+err)
+            
         })
-    ):  res.send(
-        next({ 
-            status: 400, 
-            message: 'Passwords dosent match' 
-        })
-    ):  res.send(
-        next({ 
-            status: 400, 
-            message: 'All fileds are required' 
-        })
-    )
+
+        res.send(
+                next({ 
+                status: 200, 
+                message: 'New password has been created succuefully' 
+            })
+        )
+    } else {
+        res.send(
+            next({ 
+                status: 400, 
+                message: 'All fileds are required' 
+            })
+        )
+    }  
 }
 
 exports.idk = (req, res, next) => {
