@@ -1,13 +1,14 @@
-// method : get
-// URL: api/user/manager
-// access : private
-exports.customerDashboard = (req, res) => {
-    res.send('This is customer dashboard')
-}
+const User = require('../models/User')
+const Role = require('../models/UsersRole')
+const jwt = require('jsonwebtoken')
 
 // method : get
 // URL: api/user/manager/me
 // access : private
-exports.customerProfle = (req, res) => {
-    res.send('This is customer profile')
+exports.customerProfle = async (req, res) => {
+
+    const userData = await User.findById({_id: req.user._id})
+    const role = await Role.findById({_id: userData.role[0]})
+    
+    role.role == "customer" ? res.send(`Hi ${userData.username}, Your Role Is ${role.role}`) : res.send('Access Denied')
 }

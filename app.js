@@ -1,13 +1,17 @@
 require('dotenv').config()
 const db = require('./config/config_db')
 const express = require('express')
+const cookieParser = require('cookie-parser')
 const errorHandler = require('./middlwares/errorHandler')
+const authChecker = require('./middlwares/authCheck')
 
 const app = express()
 
 // middlwares for handling or parsing incoming requests
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
+
+app.use(cookieParser())
 
 const authRouter = require('./routes/auth')
 const managerRouter = require('./routes/manager')
@@ -19,7 +23,7 @@ app.use('/api/user/manager', managerRouter)
 app.use('/api/user/customer', customerRouter)
 app.use('/api/user/delivery', deliveryRouter)
 
-// error handler
+// middlwares
 app.use(errorHandler)
 
 const port = process.env.PORT

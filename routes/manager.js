@@ -1,9 +1,9 @@
 const express = require('express')
 const router = express.Router()
-const { managerDashboard, mangerProfle } = require('../controllers/managerController')
+const { mangerProfle } = require('../controllers/managerController')
+const authChecker = require('../middlwares/authCheck')
 
 // manager
-router.get('/', managerDashboard)
-router.get('/manager/me', mangerProfle)
+router.get('/me', authChecker, mangerProfle)
 
 module.exports = router

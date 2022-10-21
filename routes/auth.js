@@ -1,5 +1,4 @@
 const express = require('express')
-const { token } = require('morgan')
 const router = express.Router()
 const { login, register, forgetPassword, resetPassword, verifyEmail, idk } = require('../controllers/authController')
 

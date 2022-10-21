@@ -25,7 +25,7 @@ exports.login = async (req, res, next) => {
             message: 'Email is not validated' 
         })
     ):  res
-            .cookie('access-token', token)
+            .cookie('accessToken', token)
             .send(`Hi ${user.username} u've just authenticated succefully`)
     :  res.send(
         next({ 
