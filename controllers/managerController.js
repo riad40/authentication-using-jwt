@@ -1,16 +1,13 @@
-const User = require('../models/User')
-const Role = require('../models/UsersRole')
-const jwt = require('jsonwebtoken')
-
 // method : get
 // URL: api/user/manager/me
 // access : private
-exports.mangerProfle = async (req, res) => {
+exports.mangerProfle = (req, res) => {
 
-    const userData = await User.findById({_id: req.user._id})
-    const role = await Role.findById({_id: userData.role[0]})
-    
-    role.role == "manager" ? res.send(`Hi ${userData.username}, Your Role Is ${role.role}`) : res.send('Access Denied')
+    const me = req.me
+
+    res.status(200).json({
+        error: false,
+        message: `Hi ${me[0].username}, Your Role Is ${me[1].role}`
+    })
+
 }
-
-
