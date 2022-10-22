@@ -3,47 +3,73 @@ const Role = require('../models/UsersRole')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const nodemailer = require('nodemailer')
-// const { token } = require('morgan')
-
-// method : post
-// URL: api/auth/login
-// access : public
-exports.login = async (req, res, next) => {
-
-    const user = await User.findOne({email: req.body.email})
-    const token = jwt.sign({_id: user._id } , process.env.JWT_SECRET, { expiresIn: '24h' })
-    // console.log(token)
-    // sent user to route dependsnon the role 
-    const role = await Role.findOne({_id: user.role[0]})
-
-    req.body.username !== '' && req.body.password !== '' ? 
-    user.email && await bcrypt.compare(req.body.password, user.password) ? 
-    user.emailIsValid == false ? 
-    res.send(
-        next({
-            status: 400, 
-            message: 'Email is not validated' 
-        })
-    ):  res
-            .cookie('accessToken', token)
-            .send(`Hi ${user.username} u've just authenticated succefully`)
-    :  res.send(
-        next({ 
-            status: 400, 
-            message: 'Credintials are wrong' 
-        })
-    ):  res.send(
-        next({ 
-            status: 400, 
-            message: 'All the fileds are required' 
-        })
-    )
-}
 
 // method : post
 // URL: api/auth/register
 // access : public
 exports.register = async (req, res, next) => {
+    // verify if email already taken
+    const emailTaken = await User.findOne({email: req.body.email})
+    // hash the password
+    const hashPassword = await bcrypt.hash(req.body.password, await bcrypt.genSalt(10))
+    // get role id
+    let userRole = await Role.findOne({role: req.body.role})
+    // set a default role if the user didn't set the role
+    let defaultRole = await Role.findOne({role: 'customer'})
+    if(userRole == null) { 
+        userRole = {
+            _id: defaultRole._id,
+            role: "customer"
+        }
+    }  
+    // make register
+    if(req.body.username !== '' && req.body.email !== '' && req.body.password !== '' && req.body.repeatpassword) { 
+        if(req.body.password == req.body.repeatpassword) {
+            if(!emailTaken) {
+                const user = new User ({
+                    username: req.body.username,
+                    email: req.body.email,
+                    password: hashPassword,
+                    role: userRole._id
+                })
+                try {
+                    const userRegister = await user.save()
+                    // token for email verification
+                    const token = jwt.sign({_id: user._id}, process.env.JWT_SECRET, { expiresIn: '1h' })  
+                    sendEmail(user.email, token, 'Verify Your Email ')  
+                    res.send({ 
+                        message: "registerd succefully", 
+                        userRegister 
+                    })
+                } catch (error) {
+                    res.send(next({
+                        status: 400, 
+                        message: "something went wrong " + error
+                    }))
+                }
+            } else {
+                res.send(next({ 
+                    status: 400, 
+                    message: 'Email is already taken' 
+                })
+            )}
+        } else {
+                res.send(next({ 
+                    status: 400, 
+                    message: 'Passwords dosent match' 
+                })
+        )}
+    } else {
+        res.send(next({ 
+            status: 400, 
+            message: 'All the fileds are required',
+        })
+    )}  
+}
+
+// send email function 
+
+const sendEmail = (email, token, mailGoal) => {
     // set up the email transporter
     const transporter = nodemailer.createTransport({
         service: process.env.SERVICE_TRANSPORTER,
@@ -55,59 +81,14 @@ exports.register = async (req, res, next) => {
             rejectUnauthorized: false
         } 
     })
-    // verify if email already taken
-    const emailTaken = await User.findOne({email: req.body.email})
-    // hash the password
-    const hashPassword = await bcrypt.hash(req.body.password, await bcrypt.genSalt(10))
-    let roles = await Role.findOne({role: req.body.role})
-    roles == null ? roles = {
-        _id: '634d5416feb86a7fa621a6ee',
-        role: "customer"
-    } : roles = roles
-    // register user method
-    const registerUser = async () => {
-        const user = new User ({
-            username: req.body.username,
-            email: req.body.email,
-            password: hashPassword,
-            role: roles._id
-        })
-        // get roles
-        try {
-            const userRegister = await user.save()
-            // token verification
-            const token = jwt.sign({_id: user._id}, process.env.JWT_SECRET, { expiresIn: '1h' })    
-            // send verification email
-            const mailContent = {
-                from: process.env.EMAIL,
-                to: user.email,
-                subject: 'Verify Your Email',
-                html: `<h2>Hi Please Verify Your Email<a href="http://localhost:3000/api/auth/register/verify/${token}">here</a></h2>`
-            }
-            transporter.sendMail(mailContent, (err) => !err ? console.log('mail just sent to '+user.email) : console.log(err))
-            res.send({ userRegister })
-        } catch (error) {
-            res.send(next({
-                status: 400, 
-                message: "something went wrong " + error
-            }))
-        }
+    // send verification email
+    const mailContent = {
+        from: mailGoal + process.env.EMAIL,
+        to: email,
+        subject: mailGoal,
+        html: `<p>Hi ${mailGoal} <a href="http://localhost:3000/api/auth/register/verify/${token}">here</a></h2>`
     }
-    // make register
-    req.body.username !== '' && req.body.email !== '' && req.body.password !== '' && req.body.repeatpassword ? req.body.password == req.body.repeatpassword ? !emailTaken ? registerUser() 
-    :   res.send(next({ 
-            status: 400, 
-            message: 'Email is already taken' 
-        })
-    ):  res.send(next({ 
-            status: 400, 
-            message: 'Passwords dosent match' 
-        })
-    ):  res.send(next({ 
-            status: 400, 
-            message: 'All the fileds are required',
-        })
-    )
+    transporter.sendMail(mailContent, (err) => !err ? console.log('mail just sent to ' + email) : console.log(err))
 }
 
 // method : post
@@ -126,6 +107,58 @@ exports.verifyEmail = async (req, res) => {
             console.log(err) && res.send('something went wrong '+err)
         
     })
+}
+
+// method : post
+// URL: api/auth/login
+// access : public
+exports.login = async (req, res, next) => {
+
+    const user = await User.findOne({email: req.body.email})
+    if(!user) { 
+        res.send(next({ 
+                status: 400, 
+                message: "email dosen't exist"  
+            })
+        )
+    } else {
+
+        const token = jwt.sign({_id: user._id } , process.env.JWT_SECRET, { expiresIn: '24h' })
+    
+        if(req.body.email !== '' && req.body.password !== ''){
+            if(user.email && await bcrypt.compare(req.body.password, user.password)) {
+                if(user.emailIsValid) {
+                    res
+                        .cookie('accessToken', token)
+                        .json({ 
+                            message: `Hi ${user.username} u've just logged in succefully`, 
+                            token
+                        })
+                } else {
+                    res.send(next({
+                            status: 400, 
+                            message: 'Email is not validated, Check your inbox to validate your email' 
+                        })
+                    )
+                }
+            } else {
+                res.send(
+                    next({ 
+                        status: 400, 
+                        message: 'Credintials are wrong' 
+                    })
+                )
+            }
+        } else {
+            res.send(
+                next({ 
+                    status: 400, 
+                    message: 'All the fileds are required' 
+                })
+            )
+        }
+    }
+
 }
 
 // method : post
