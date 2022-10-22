@@ -36,7 +36,7 @@ exports.register = async (req, res, next) => {
                     const userRegister = await user.save()
                     // token for email verification
                     const token = jwt.sign({_id: user._id}, process.env.JWT_SECRET, { expiresIn: '1h' })  
-                    sendEmail(user.email, token, 'Verify Your Email ')  
+                    sendEmail(user.email, token, 'auth/register/verify', 'Verify Your Email ')  
                     res.send({ 
                         message: "registerd succefully", 
                         userRegister 
@@ -69,7 +69,7 @@ exports.register = async (req, res, next) => {
 
 // send email function 
 
-const sendEmail = (email, token, mailGoal) => {
+const sendEmail = (email, token, route, mailGoal) => {
     // set up the email transporter
     const transporter = nodemailer.createTransport({
         service: process.env.SERVICE_TRANSPORTER,
@@ -86,7 +86,7 @@ const sendEmail = (email, token, mailGoal) => {
         from: mailGoal + process.env.EMAIL,
         to: email,
         subject: mailGoal,
-        html: `<p>Hi ${mailGoal} <a href="http://localhost:3000/api/auth/register/verify/${token}">here</a></h2>`
+        html: `<p>Hi ${mailGoal} <a href="http://localhost:3000/api/${route}/${token}">here</a></h2>`
     }
     transporter.sendMail(mailContent, (err) => !err ? console.log('mail just sent to ' + email) : console.log(err))
 }
@@ -94,15 +94,23 @@ const sendEmail = (email, token, mailGoal) => {
 // method : post
 // URL: api/auth/register/verify/:token
 // access : public
-exports.verifyEmail = async (req, res) => {
+exports.verifyEmail = async (req, res, next) => {
+
     const token = req.params.token
+
     const userData = jwt.verify(token, process.env.JWT_SECRET)
-    const userId = userData._id
-    const allUserData = await User.findOne({_id: userId})
+
+    const allUserData = await User.findOne({_id: userData._id})
+
     allUserData.emailIsValid == true ? res.send('email already valide') :
-    User.updateOne({_id: userId}, { $set: { emailIsValid: true } })
+    User.updateOne({_id: userData._id }, { $set: { emailIsValid: true } })
         .then(() => {
-            res.send('email verified succefully') && console.log('email verified succefully')
+            res.send(
+                next({ 
+                    status: 200, 
+                    message: 'A reset password mail has been sent to your inbox' 
+                })
+            )
         }).catch((err)=> {
             console.log(err) && res.send('something went wrong '+err)
         
@@ -165,30 +173,15 @@ exports.login = async (req, res, next) => {
 // URL: api/auth/forgetpassword
 // access : public
 exports.forgetPassword = async (req, res, next) => {
-    // set up the email transporter
-    const transporter = nodemailer.createTransport({
-        service: process.env.SERVICE_TRANSPORTER,
-        auth: {
-            user: process.env.EMAIL, 
-            pass: process.env.PASSWORD
-        }, 
-        tls: {
-            rejectUnauthorized: false
-        } 
-    })
 
     if(req.body.email !== '') {
+
         const user = await User.findOne({email: req.body.email})
+
         // generate token
         const token = jwt.sign({_id: user._id } , process.env.JWT_SECRET, { expiresIn: '24h' })
-        // send verification email
-        const mailContent = {
-            from: process.env.EMAIL,
-            to: user.email,
-            subject: 'Reset Password',
-            html: `<h2>Hi Please Verify Your Email<a href="http://localhost:3000/api/auth/resetPassword/${token}">here</a></h2>`
-        }
-        transporter.sendMail(mailContent, (err) => !err ? console.log('a reset password mail just sent to '+user.email) : console.log(err))
+        // send forget password email
+        sendEmail(user.email, token, 'auth/resetpassword', 'Verify Your Email To Reset Password ')  
         res.send(
             next({ 
                 status: 200, 
@@ -222,24 +215,22 @@ exports.resetPassword = async (req, res, next) => {
             )
         }
 
-        const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MzUxZTVmNWFhMTZhZjZlOTRhOGJiYTkiLCJpYXQiOjE2NjYzMTI2NjgsImV4cCI6MTY2NjM5OTA2OH0.RIVIpAGQ9vABov2pBY3yZb5afFoUM5VG0pIQvQ0yAxo'
-        const userData = jwt.verify(token, process.env.JWT_SECRET)
-        const userId = userData._id
-        const pwd = await bcrypt.hash(req.body.newpassword, await bcrypt.genSalt(10))
-        User.updateOne({_id: userId}, { $set: { password: pwd} })
-            .then(() => {
-                res.send('Password Updated Succefully') && console.log('Password Updated Succefully')
-            }).catch((err)=> {
-                console.log(err) && res.send('something went wrong '+err)
-            
-        })
+        const token = req.params.token
 
-        res.send(
-                next({ 
-                status: 200, 
-                message: 'New password has been created succuefully' 
+        const userData = jwt.verify(token, process.env.JWT_SECRET)
+
+        const pwd = await bcrypt.hash(req.body.newpassword, await bcrypt.genSalt(10))
+
+        User.updateOne({_id: userData._id}, { $set: { password: pwd} })
+            .then(() => {
+                res.send(next({ 
+                        status: 200, 
+                        message: 'Password Changed Succefully' 
+                    })
+                )
+            }).catch((err)=> {
+                console.log(err) && res.send('something went wrong ' + err)
             })
-        )
     } else {
         res.send(
             next({ 
