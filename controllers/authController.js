@@ -42,29 +42,29 @@ exports.register = async (req, res, next) => {
                         userRegister 
                     })
                 } catch (error) {
-                    res.send(next({
+                    next({
                         status: 400, 
                         message: "something went wrong " + error
-                    }))
+                    })
                 }
             } else {
-                res.send(next({ 
+                next({ 
                     status: 400, 
                     message: 'Email is already taken' 
                 })
-            )}
+            }
         } else {
-                res.send(next({ 
-                    status: 400, 
-                    message: 'Passwords dosent match' 
-                })
-        )}
+            next({ 
+                status: 400, 
+                message: 'Passwords dosent match' 
+            })
+        }
     } else {
-        res.send(next({ 
+        next({ 
             status: 400, 
             message: 'All the fileds are required',
         })
-    )}  
+    }  
 }
 
 // send email function 
@@ -105,12 +105,10 @@ exports.verifyEmail = async (req, res, next) => {
     allUserData.emailIsValid == true ? res.send('email already valide') :
     User.updateOne({_id: userData._id }, { $set: { emailIsValid: true } })
         .then(() => {
-            res.send(
-                next({ 
-                    status: 200, 
-                    message: 'A reset password mail has been sent to your inbox' 
-                })
-            )
+            next({ 
+                status: 200, 
+                message: 'A reset password mail has been sent to your inbox' 
+            })
         }).catch((err)=> {
             console.log(err) && res.send('something went wrong '+err)
         
@@ -124,11 +122,10 @@ exports.login = async (req, res, next) => {
 
     const user = await User.findOne({email: req.body.email})
     if(!user) { 
-        res.send(next({ 
-                status: 400, 
-                message: "email dosen't exist"  
-            })
-        )
+        next({ 
+            status: 400, 
+            message: "email dosen't exist"  
+        })
     } else {
 
         const token = jwt.sign({_id: user._id } , process.env.JWT_SECRET, { expiresIn: '24h' })
@@ -143,27 +140,22 @@ exports.login = async (req, res, next) => {
                             token
                         })
                 } else {
-                    res.send(next({
-                            status: 400, 
-                            message: 'Email is not validated, Check your inbox to validate your email' 
-                        })
-                    )
+                    next({
+                        status: 400, 
+                        message: 'Email is not validated, Check your inbox to validate your email' 
+                    })
                 }
             } else {
-                res.send(
-                    next({ 
-                        status: 400, 
-                        message: 'Credintials are wrong' 
-                    })
-                )
-            }
-        } else {
-            res.send(
                 next({ 
                     status: 400, 
-                    message: 'All the fileds are required' 
+                    message: 'Credintials are wrong' 
                 })
-            )
+            }
+        } else {
+            next({ 
+                status: 400, 
+                message: 'All the fileds are required' 
+            })
         }
     }
 
@@ -182,20 +174,16 @@ exports.forgetPassword = async (req, res, next) => {
         const token = jwt.sign({_id: user._id } , process.env.JWT_SECRET, { expiresIn: '24h' })
         // send forget password email
         sendEmail(user.email, token, 'auth/resetpassword', 'Verify Your Email To Reset Password ')  
-        res.send(
-            next({ 
-                status: 200, 
-                message: 'A reset password mail has been sent to your inbox' 
-            })
-        )
+        next({ 
+            status: 200, 
+            message: 'A reset password mail has been sent to your inbox' 
+        })
     }
     else {
-        res.send(
-            next({ 
-                status: 400, 
-                message: 'email is required' 
-            })
-        )
+        next({ 
+            status: 400, 
+            message: 'email is required' 
+        })
     }
 }
 
@@ -207,12 +195,10 @@ exports.resetPassword = async (req, res, next) => {
     if(req.body.newpassword !== '' && req.body.repeatpassword !== '') {
 
         if (req.body.newpassword !== req.body.repeatpassword) {  
-            res.send(
-                next({ 
-                    status: 400, 
-                    message: 'Passwords dosent match' 
-                })
-            )
+            next({ 
+                status: 400, 
+                message: 'Passwords dosent match' 
+            })
         }
 
         const token = req.params.token
@@ -223,24 +209,17 @@ exports.resetPassword = async (req, res, next) => {
 
         User.updateOne({_id: userData._id}, { $set: { password: pwd} })
             .then(() => {
-                res.send(next({ 
+                next({ 
                         status: 200, 
                         message: 'Password Changed Succefully' 
                     })
-                )
             }).catch((err)=> {
                 console.log(err) && res.send('something went wrong ' + err)
             })
     } else {
-        res.send(
-            next({ 
-                status: 400, 
-                message: 'All fileds are required' 
-            })
-        )
+        next({ 
+            status: 400, 
+            message: 'All fileds are required' 
+        })
     }  
-}
-
-exports.idk = (req, res, next) => {
-    next()
 }
