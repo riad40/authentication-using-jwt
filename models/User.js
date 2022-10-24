@@ -27,6 +27,9 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    resetTokenValid: {
+        type: String
+    },
     role: [{
         type: mongoose.Types.ObjectId,
         ref: 'roles'

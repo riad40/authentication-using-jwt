@@ -107,7 +107,7 @@ exports.verifyEmail = async (req, res, next) => {
         .then(() => {
             next({ 
                 status: 200, 
-                message: 'A reset password mail has been sent to your inbox' 
+                message: 'verified' 
             })
         }).catch((err)=> {
             console.log(err) && res.send('something went wrong '+err)
@@ -172,6 +172,12 @@ exports.forgetPassword = async (req, res, next) => {
 
         // generate token
         const token = jwt.sign({_id: user._id } , process.env.JWT_SECRET, { expiresIn: '24h' })
+        // send token to db
+        try {
+            await User.updateOne({_id: user._id}, { $set : { resetTokenValid: token } })
+        } catch (error) {
+            console.log(error)
+        }
         // send forget password email
         sendEmail(user.email, token, 'auth/resetpassword', 'Verify Your Email To Reset Password ')  
         next({ 
@@ -205,17 +211,28 @@ exports.resetPassword = async (req, res, next) => {
 
         const userData = jwt.verify(token, process.env.JWT_SECRET)
 
+        const user = await User.findOne({ _id: userData._id})
+
         const pwd = await bcrypt.hash(req.body.newpassword, await bcrypt.genSalt(10))
 
-        User.updateOne({_id: userData._id}, { $set: { password: pwd} })
-            .then(() => {
-                next({ 
-                        status: 200, 
-                        message: 'Password Changed Succefully' 
-                    })
-            }).catch((err)=> {
-                console.log(err) && res.send('something went wrong ' + err)
+        if(token == user.resetTokenValid) {
+
+            User.updateOne({_id: userData._id}, { $set: { password: pwd} })
+                .then(() => {
+                    next({ 
+                            status: 200, 
+                            message: 'Password Changed Succefully'
+                        })
+                }).catch((err)=> {
+                    console.log(err) && res.send('something went wrong ' + err)
+                })
+        } else {
+            next({
+                error: true,
+                status: 400,
+                message: "Token invalid"
             })
+        }
     } else {
         next({ 
             status: 400, 

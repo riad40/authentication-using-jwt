@@ -6,6 +6,6 @@ router.post('/login', login)
 router.post('/register', register)
 router.get('/register/verify/:token', verifyEmail)
 router.post('/forgetpassword', forgetPassword)
-router.post('/resetpassword', resetPassword)
+router.post('/resetpassword/:token', resetPassword)
 
 module.exports = router
