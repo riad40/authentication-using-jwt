@@ -3,14 +3,13 @@ const db = require('./config/config_db')
 const express = require('express')
 const cookieParser = require('cookie-parser')
 const errorHandler = require('./middlwares/errorHandler')
-const authChecker = require('./middlwares/authCheck')
 
 const app = express()
 
 // middlwares for handling or parsing incoming requests
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
-
+ 
 app.use(cookieParser())
 
 const authRouter = require('./routes/auth')
