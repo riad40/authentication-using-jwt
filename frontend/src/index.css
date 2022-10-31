@@ -4,3 +4,10 @@ body {
 .text-color {
   color: #41CD7D;
 }
+.options span {
+  color: #9499cf;
+}
+.options a {
+  border-bottom: 2px solid #41CD7D;
+  color: #41CD7D;
+}
