@@ -1,6 +1,7 @@
 require('dotenv').config()
 const db = require('./config/config_db')
 const express = require('express')
+const cors = require('cors')
 const cookieParser = require('cookie-parser')
 const errorHandler = require('./middlwares/errorHandler')
 
@@ -9,7 +10,8 @@ const app = express()
 // middlwares for handling or parsing incoming requests
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
- 
+
+app.use(cors())
 app.use(cookieParser())
 
 const authRouter = require('./routes/auth')
