@@ -11,7 +11,7 @@ const app = express()
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
 
-app.use(cors())
+app.use(cors({ origin: true, credentials: true }))
 app.use(cookieParser())
 
 const authRouter = require('./routes/auth')
@@ -21,7 +21,7 @@ const deliveryRouter = require('./routes/delivery')
 
 app.use('/api/auth', authRouter)
 app.use('/api/user/manager', managerRouter)
-app.use('/api/user/customer', customerRouter)
+app.use('/api/user/customer', customerRouter) 
 app.use('/api/user/delivery', deliveryRouter)
 
 // middlwares

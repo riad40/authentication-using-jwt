@@ -12,6 +12,7 @@ exports.register = async (req, res, next) => {
     const emailTaken = await User.findOne({email: req.body.email})
     // hash the password
     const hashPassword = await bcrypt.hash(req.body.password, await bcrypt.genSalt(10))
+    // const hashPassword = req.body.password
     // get role id
     let userRole = await Role.findOne({role: req.body.role})
     // set a default role if the user didn't set the role
@@ -23,42 +24,35 @@ exports.register = async (req, res, next) => {
         }
     }  
     // make register
-    if(req.body.username !== '' && req.body.email !== '' && req.body.password !== '' && req.body.repeatpassword) { 
-        if(req.body.password == req.body.repeatpassword) {
-            if(!emailTaken) {
-                const user = new User ({
-                    username: req.body.username,
-                    email: req.body.email,
-                    password: hashPassword,
-                    role: userRole._id
+    if(req.body.username !== '' && req.body.email !== '' && req.body.password !== '') { 
+        if(!emailTaken) {
+            const user = new User ({
+                username: req.body.username,
+                email: req.body.email,
+                password: hashPassword,
+                role: userRole._id 
+            })
+            try {
+                const userRegister = await user.save()
+                // token for email verification
+                const token = jwt.sign({_id: user._id}, process.env.JWT_SECRET, { expiresIn: '1h' })  
+                sendEmail(user.email, token, 'verify', 'Verify Your Email ')  
+                res.status(200).send({ 
+                    message: "registerd succefully", 
                 })
-                try {
-                    const userRegister = await user.save()
-                    // token for email verification
-                    const token = jwt.sign({_id: user._id}, process.env.JWT_SECRET, { expiresIn: '1h' })  
-                    sendEmail(user.email, token, 'auth/register/verify', 'Verify Your Email ')  
-                    res.send({ 
-                        message: "registerd succefully", 
-                        userRegister 
-                    })
-                } catch (error) {
-                    next({
-                        status: 400, 
-                        message: "something went wrong " + error
-                    })
-                }
-            } else {
-                next({ 
+            } catch (error) {
+                next({
                     status: 400, 
-                    message: 'Email is already taken' 
+                    message: "something went wrong " + error
                 })
             }
         } else {
             next({ 
                 status: 400, 
-                message: 'Passwords dosent match' 
+                message: 'Email is already taken' 
             })
         }
+        
     } else {
         next({ 
             status: 400, 
@@ -86,7 +80,7 @@ const sendEmail = (email, token, route, mailGoal) => {
         from: mailGoal + process.env.EMAIL,
         to: email,
         subject: mailGoal,
-        html: `<p>Hi ${mailGoal} <a href="http://localhost:3000/api/${route}/${token}">here</a></h2>`
+        html: `<p>Hi ${mailGoal} <a href="http://localhost:3000/${route}/${token}">here</a></h2>`
     }
     transporter.sendMail(mailContent, (err) => !err ? console.log('mail just sent to ' + email) : console.log(err))
 }
@@ -100,9 +94,6 @@ exports.verifyEmail = async (req, res, next) => {
 
     const userData = jwt.verify(token, process.env.JWT_SECRET)
 
-    const allUserData = await User.findOne({_id: userData._id})
-
-    allUserData.emailIsValid == true ? res.send('email already valide') :
     User.updateOne({_id: userData._id }, { $set: { emailIsValid: true } })
         .then(() => {
             next({ 
@@ -129,14 +120,17 @@ exports.login = async (req, res, next) => {
     } else {
 
         const token = jwt.sign({_id: user._id } , process.env.JWT_SECRET, { expiresIn: '24h' })
+
+        const role = await Role.findById({ _id: user.role[0] })
     
         if(req.body.email !== '' && req.body.password !== ''){
             if(user.email && await bcrypt.compare(req.body.password, user.password)) {
                 if(user.emailIsValid) {
                     res
-                        .cookie('accessToken', token)
+                        .cookie('accessToken', token, { httpOnly: false })
                         .json({ 
                             message: `Hi ${user.username} u've just logged in succefully`, 
+                            role: role.role,
                             token
                         })
                 } else {
@@ -179,10 +173,11 @@ exports.forgetPassword = async (req, res, next) => {
             console.log(error)
         }
         // send forget password email
-        sendEmail(user.email, token, 'auth/resetpassword', 'Verify Your Email To Reset Password ')  
+        sendEmail(user.email, token, 'resetpassword', 'Verify Your Email To Reset Password ')  
         next({ 
-            status: 200, 
-            message: 'A reset password mail has been sent to your inbox' 
+            error: false,
+            message: 'A reset password mail has been sent to your inbox',
+            status: 200
         })
     }
     else {
