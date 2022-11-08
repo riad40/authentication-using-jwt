@@ -2,8 +2,7 @@ const User = require('../models/User')
 const Role = require('../models/UsersRole')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const nodemailer = require('nodemailer')
-
+const sendEmail = require('../helpers/senEmail')
 // method : post
 // URL: api/auth/register
 // access : public
@@ -20,7 +19,7 @@ exports.register = async (req, res, next) => {
     if(userRole == null) { 
         userRole = {
             _id: defaultRole._id,
-            role: "customer"
+            role: defaultRole.role
         }
     }  
     // make register
@@ -33,21 +32,23 @@ exports.register = async (req, res, next) => {
                 role: userRole._id 
             })
             try {
-                const userRegister = await user.save()
+                await user.save()
                 // token for email verification
                 const token = jwt.sign({_id: user._id}, process.env.JWT_SECRET, { expiresIn: '1h' })  
                 sendEmail(user.email, token, 'verify', 'Verify Your Email ')  
                 res.status(200).send({ 
-                    message: "registerd succefully", 
+                    message: "A verefication mail just sent your inbox"
                 })
             } catch (error) {
                 next({
+                    error: true,
                     status: 400, 
                     message: "something went wrong " + error
                 })
             }
         } else {
             next({ 
+                error: true,
                 status: 400, 
                 message: 'Email is already taken' 
             })
@@ -55,34 +56,11 @@ exports.register = async (req, res, next) => {
         
     } else {
         next({ 
+            error: true,
             status: 400, 
             message: 'All the fileds are required',
         })
     }  
-}
-
-// send email function 
-
-const sendEmail = (email, token, route, mailGoal) => {
-    // set up the email transporter
-    const transporter = nodemailer.createTransport({
-        service: process.env.SERVICE_TRANSPORTER,
-        auth: {
-            user: process.env.EMAIL, 
-            pass: process.env.PASSWORD
-        }, 
-        tls: {
-            rejectUnauthorized: false
-        } 
-    })
-    // send verification email
-    const mailContent = {
-        from: mailGoal + process.env.EMAIL,
-        to: email,
-        subject: mailGoal,
-        html: `<p>Hi ${mailGoal} <a href="http://localhost:3000/${route}/${token}">here</a></h2>`
-    }
-    transporter.sendMail(mailContent, (err) => !err ? console.log('mail just sent to ' + email) : console.log(err))
 }
 
 // method : post
@@ -97,6 +75,7 @@ exports.verifyEmail = async (req, res, next) => {
     User.updateOne({_id: userData._id }, { $set: { emailIsValid: true } })
         .then(() => {
             next({ 
+                error: false,
                 status: 200, 
                 message: 'verified' 
             })
@@ -114,6 +93,7 @@ exports.login = async (req, res, next) => {
     const user = await User.findOne({email: req.body.email})
     if(!user) { 
         next({ 
+            error: true,
             status: 400, 
             message: "email dosen't exist"  
         })
@@ -135,18 +115,21 @@ exports.login = async (req, res, next) => {
                         })
                 } else {
                     next({
+                        error: true,
                         status: 400, 
                         message: 'Email is not validated, Check your inbox to validate your email' 
                     })
                 }
             } else {
                 next({ 
+                    error: true,
                     status: 400, 
                     message: 'Credintials are wrong' 
                 })
             }
         } else {
             next({ 
+                error: true,
                 status: 400, 
                 message: 'All the fileds are required' 
             })
@@ -176,12 +159,13 @@ exports.forgetPassword = async (req, res, next) => {
         sendEmail(user.email, token, 'resetpassword', 'Verify Your Email To Reset Password ')  
         next({ 
             error: false,
+            status: 200,
             message: 'A reset password mail has been sent to your inbox',
-            status: 200
         })
     }
     else {
         next({ 
+            error: true,
             status: 400, 
             message: 'email is required' 
         })
@@ -197,6 +181,7 @@ exports.resetPassword = async (req, res, next) => {
 
         if (req.body.newpassword !== req.body.repeatpassword) {  
             next({ 
+                error: true,
                 status: 400, 
                 message: 'Passwords dosent match' 
             })
@@ -215,6 +200,7 @@ exports.resetPassword = async (req, res, next) => {
             User.updateOne({_id: userData._id}, { $set: { password: pwd} })
                 .then(() => {
                     next({ 
+                            error: false,
                             status: 200, 
                             message: 'Password Changed Succefully'
                         })
@@ -230,6 +216,7 @@ exports.resetPassword = async (req, res, next) => {
         }
     } else {
         next({ 
+            error: true,
             status: 400, 
             message: 'All fileds are required' 
         })
