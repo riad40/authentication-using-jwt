@@ -7,7 +7,12 @@ function ForgetPassword({ inputs }) {
     baseURL: 'http://localhost:3002/api'
   })
 
-  const [email, setEmail] = useState({})
+  const [email, setEmail] = useState({
+    email: ''
+  })
+
+  const [err, setErr] = useState('')
+  const [succ, setSucc] = useState('')
 
   const inputHandler = (e) => {
     setEmail({...email, [e.target.id]: e.target.value})
@@ -19,10 +24,12 @@ function ForgetPassword({ inputs }) {
 
     api.post('/auth/forgetpassword', email, { withCredentials: true })
         .then((response) => {
-        console.log(response.data)
+          setErr('')
+          setSucc(response.data.message)
         })
         .catch((err) => {
-        console.log(err.response.data.message)
+          setErr(err.response.data.message)
+          setSucc('')
         })
 
   }
@@ -32,6 +39,8 @@ function ForgetPassword({ inputs }) {
     <>
       <h1 className="block py-4 text-white text-2xl font-400 text-center text-color">Forget Password</h1>
       <form onSubmit={forgetPwd} method="post">
+        <p className='text-center text-red-300' >{ err }</p>
+        <p className='text-center text-green-300' >{ succ }</p>
         {
           inputs.map((input) => (
             <>

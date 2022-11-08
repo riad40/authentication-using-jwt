@@ -8,9 +8,14 @@ function Login({ inputs }) {
     baseURL: 'http://localhost:3002/api'
   })
 
-  const [user, setUser] = useState({})
+  const [user, setUser] = useState({
+    email: '',
+    password: ''
+  })
 
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  const [err, setErr] = useState('')
 
   const inputHandler = (e) => {
     setUser({...user, [e.target.id]: e.target.value})
@@ -24,19 +29,19 @@ function Login({ inputs }) {
 
     api.post('/auth/login', user, { withCredentials: true })
       .then((response) => {
-        console.log(response.data)
         setIsLoggedIn(true)
         localStorage.setItem('role', response.data.role)
       })
       .catch((err) => {
-        console.log(err.response.data.message)
         setIsLoggedIn(false)
+        setErr(err.response.data.message)
       })
   }
   return (
     <>
       <h1 className="block py-4 text-white text-2xl font-400 text-center text-color">Log In</h1>
       <form onSubmit={login} method="post">
+        <p className='text-center text-red-300'>{ err }</p>
         {
           inputs.map((input) => (
             <>

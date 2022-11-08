@@ -8,7 +8,14 @@ function Register({ inputs }) {
         baseURL: 'http://localhost:3002/api'
     })
 
-    const [user, setUser] = useState({})
+    const [user, setUser] = useState({
+        username: '',
+        email: '',
+        password:''
+    })
+
+    const [err, setErr] = useState('')
+    const [succ, setSucc] = useState('')
 
     const inputHandler = (e) => {
         setUser({...user, [e.target.id]: e.target.value})
@@ -20,15 +27,21 @@ function Register({ inputs }) {
 
         api.post('/auth/register', user)
             .then((response) => {
-                console.log(response.data.message)
+                setErr('')
+                setSucc(response.data.message)
             })
-            .catch((err) => console.log(err.response.data.message))
+            .catch((err) => {
+                setErr(err.response.data.message)
+                setSucc('')
+            })
     }
 
     return (
         <div>
             <h1 className="block py-4 text-white text-2xl font-400 text-center text-color">Register</h1>
             <form onSubmit = { register } method="post">
+                <p className='text-center text-red-300' >{ err }</p>
+                <p className='text-center text-green-300' >{ succ }</p>
             {
                 inputs.map((input) => (
                 <div>

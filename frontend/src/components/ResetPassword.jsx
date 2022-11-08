@@ -8,11 +8,16 @@ function ResetPassword({ inputs }) {
     baseURL: 'http://localhost:3002/api'
   })
 
-  const [pwds, setPwds] = useState({})
+  const [pwds, setPwds] = useState({
+    newpassword:''
+  })
 
   const inputHandler = (e) => {
     setPwds({...pwds, [e.target.id]: e.target.value})
   }
+
+  const [err, setErr] = useState('')
+  const [succ, setSucc] = useState('')
 
   const params = useParams()
 
@@ -21,14 +26,22 @@ function ResetPassword({ inputs }) {
     e.preventDefault()
 
     api.post(`/auth/resetpassword/${params.token}`, pwds)
-        .then((response) => console.log(response.data.message))
-        .catch((err) => console.log(err))
+      .then((response) => {
+        setErr('')
+        setSucc(response.data.message)
+      })
+      .catch((err) => {
+        setErr(err.response.data.message)
+        setSucc('')
+      })
   }
 
   return (
     <>
       <h1 className="block py-4 text-white text-2xl font-400 text-center text-color">Reset Password</h1>
       <form onSubmit={ resetPassword } method="post">
+        <p className='text-center text-red-300' >{ err }</p>
+        <p className='text-center text-green-300' >{ succ }</p>
         {
           inputs.map((input) => (
             <>
