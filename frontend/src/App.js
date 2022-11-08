@@ -1,4 +1,4 @@
-import { Home, Login, Profile, Register, VerifyEmail, ForgetPassword, ResetPassword } from './components/index'
+import { Home, Login, Profile, Register, VerifyEmail, ForgetPassword, ResetPassword, NotFound } from './components/index'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 function App() {
 
@@ -206,6 +206,7 @@ function App() {
               <Route path='/profile' element={ <Profile /> } />
               <Route path="/forgetpassword" element={ <ForgetPassword inputs={ inputs2 } /> } />
               <Route path='/resetpassword/:token' element={ <ResetPassword inputs={ inputs3 } /> } />
+              <Route path='*' element={ <NotFound /> } />
             </Routes>
           </div>
         </div>
