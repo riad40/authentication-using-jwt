@@ -1,5 +1,6 @@
-import { Home, Login, Profile, Register, VerifyEmail, ForgetPassword, ResetPassword, NotFound } from './components/index'
+import { Home, Login, Profile, Register, VerifyEmail, ForgetPassword, ResetPassword, NotFound, IsLoggedIn } from './components/index'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
+import { AuthProvider } from './components/AuthContext'
 function App() {
 
   const inputs = [
@@ -195,22 +196,26 @@ function App() {
 
   return (
     <div className="App">
-      <Router>
-        <div className="w-2/5 rounded-lg" style={ { backgroundColor: '#202442'}}>
-          <div className="p-5">
-            <Routes>
-              <Route path="/" element={ <Home /> } />
-              <Route path="/login" element={ <Login inputs={ inputs } /> } />
-              <Route path="/register" element={ <Register inputs={ inputs1 } /> } />
-              <Route path="/verify/:token" element={ <VerifyEmail /> } />
-              <Route path='/profile' element={ <Profile /> } />
-              <Route path="/forgetpassword" element={ <ForgetPassword inputs={ inputs2 } /> } />
-              <Route path='/resetpassword/:token' element={ <ResetPassword inputs={ inputs3 } /> } />
-              <Route path='*' element={ <NotFound /> } />
-            </Routes>
+      <AuthProvider>
+        <Router>
+          <div className="w-2/5 rounded-lg" style={ { backgroundColor: '#202442'}}>
+            <div className="p-5">
+              <Routes>
+                <Route path="/" element={ <Home /> } />
+                <Route path="/login" element={ <Login inputs={ inputs } /> } />
+                <Route path="/register" element={ <Register inputs={ inputs1 } /> } />
+                <Route path="/verify/:token" element={ <VerifyEmail /> } />
+                <Route element={ <IsLoggedIn /> }>
+                  <Route path='/profile' element={ <Profile /> } />
+                </Route>
+                <Route path="/forgetpassword" element={ <ForgetPassword inputs={ inputs2 } /> } />
+                <Route path='/resetpassword/:token' element={ <ResetPassword inputs={ inputs3 } /> } />
+                <Route path='*' element={ <NotFound /> } />
+              </Routes>
+            </div>
           </div>
-        </div>
-      </Router>
+        </Router>
+      </AuthProvider>
     </div>
   )
 }

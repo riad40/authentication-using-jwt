@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useContext } from 'react'
 import axios from 'axios'
 import { Navigate, Link } from 'react-router-dom'
+import AuthContext from './AuthContext'
 
 function Login({ inputs }) {
 
@@ -13,9 +14,11 @@ function Login({ inputs }) {
     password: ''
   })
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-
   const [err, setErr] = useState('')
+
+  const { isAuth, setIsAuth } = useContext(AuthContext)
+
+  console.log(isAuth)
 
   const inputHandler = (e) => {
     setUser({...user, [e.target.id]: e.target.value})
@@ -29,11 +32,17 @@ function Login({ inputs }) {
 
     api.post('/auth/login', user, { withCredentials: true })
       .then((response) => {
-        setIsLoggedIn(true)
-        localStorage.setItem('role', response.data.role)
+        setIsAuth({
+          isLoggedIn: true,
+          user: {
+            role: response.data.role
+          }
+        })
       })
       .catch((err) => {
-        setIsLoggedIn(false)
+        setIsAuth({
+          isLoggedIn: false
+        })
         setErr(err.response.data.message)
       })
   }
@@ -50,15 +59,15 @@ function Login({ inputs }) {
             </>
           )) 
         }
-        <div class="flex flex-col items-start py-3 options">
+        <div className="flex flex-col items-start py-3 options">
           <Link to="/forgetpassword" className="text-sm">Forget Password</Link>
         </div>
-        <div class="flex flex-col items-center py-3 options">
+        <div className="flex flex-col items-center py-3 options">
           <span>Don't have an account ?</span>
           <Link to="/register" className="text-xl">Register</Link>
         </div>
       </form>
-      { isLoggedIn && <Navigate to='/profile' /> }
+      { isAuth.isLoggedIn && <Navigate to='/profile' /> }
     </>
   )
 }
