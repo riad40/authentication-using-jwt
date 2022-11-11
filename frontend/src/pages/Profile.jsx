@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
-import axios from 'axios'
 import { useState, useContext } from 'react'
-import AuthContext from './AuthContext'
+import AuthContext from '../context/AuthContext'
+import { api } from '../helpers/api'
 
 function Profile() {
 
@@ -18,11 +18,7 @@ function Profile() {
     localStorage.clear()
     document.cookie.clear()
   }
-
-  const api = axios.create({
-    baseURL: 'http://localhost:3002/api'
-  })
-
+  
   api.get(`/user/${role}/me`, {
     headers: {'set-cookie': document.cookie},
     withCredentials: true

@@ -1,12 +1,8 @@
-import axios from 'axios'
+import { api } from '../helpers/api'
 import { Link, useParams } from 'react-router-dom'
 import { useState } from 'react'
 
 function VerifyEmail() {
-
-    const api = axios.create({
-        baseURL: 'http://localhost:3002/api'
-    })
 
     const [msg, setMsg] = useState('tst')
 
