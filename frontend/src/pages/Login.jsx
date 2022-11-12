@@ -15,8 +15,6 @@ function Login({ inputs }) {
 
   const { isAuth, setIsAuth } = useContext(AuthContext)
 
-  console.log(isAuth)
-
   const inputHandler = (e) => {
     setUser({...user, [e.target.id]: e.target.value})
   }

@@ -10,15 +10,18 @@ function Profile() {
   const [err, setErr ] = useState('')
   const Navigate = useNavigate()
 
-  const { isAuth } = useContext(AuthContext)
+  const { isAuth, setIsAuth } = useContext(AuthContext)
 
-  const role = isAuth.user.role || 'customer'
+  const role = isAuth.user.role
 
   const logout = () => {
     api.get(`/auth/logout`, {
       withCredentials: true
     }).then((response) => {
         Navigate('/')
+        setIsAuth({
+          isLoggedIn: false
+        })
       })
       .catch((err) => {
         setErr(err.response.data.message)
