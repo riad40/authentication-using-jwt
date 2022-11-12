@@ -46,7 +46,7 @@ function Login({ inputs }) {
   return (
     <>
       <FormContainer>
-        <h1 className="block py-4 text-white text-2xl font-400 text-center text-color">Log In</h1>
+        <h1 className="block py-4 text-white text-2xl font-400 text-center text-color underline">Log In</h1>
         <form onSubmit={login} method="post">
           <p className='text-center text-red-300'>{ err }</p>
           {
@@ -57,9 +57,10 @@ function Login({ inputs }) {
               </>
             )) 
           }
-          <div className="flex flex-col items-start py-3 options">
+          <div className="flex flex-col items-start mt-2 options">
             <Link to="/forgetpassword" className="text-sm">Forget Password</Link>
           </div>
+          <button type="submit" className='block my-5 text-dark font-medium cursor-pointer w-full' style={{ backgroundColor: '#41CD7D', outline: 'none', padding: '10px', borderRadius: '10px' }}>Submit</button>
           <div className="flex flex-col items-center py-3 options">
             <span>Don't have an account ?</span>
             <Link to="/register" className="text-xl">Register</Link>

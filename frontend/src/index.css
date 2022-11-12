@@ -1,3 +1,8 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 .App {
   display: flex;
   align-items: center;
@@ -17,10 +22,10 @@ body {
   border-bottom: 2px solid #41CD7D;
   color: #41CD7D;
 }
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+.form {
+  width: 500px;
+  min-width: 300px;
 }
+
+
 

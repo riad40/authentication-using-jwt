@@ -27,19 +27,6 @@ const inputs = [
         padding: '10px', 
         borderRadius: '10px' 
       }
-    },
-    {
-      type: 'submit',
-      id: 'submit',
-      name: 'submit',
-      value: 'Submit',
-      class: 'block my-5 text-dark font-medium cursor-pointer w-full',
-      style: {
-        backgroundColor: '#41CD7D', 
-        outline: 'none', 
-        padding: '10px', 
-        borderRadius: '10px' 
-      }
     }
   ]
 const inputs1 = [
@@ -88,14 +75,15 @@ const inputs1 = [
       }
     },
     {
-      type: 'submit',
-      id: 'submit',
-      name: 'submit',
-      value: 'Submit',
-      class: 'block my-5 text-dark font-medium cursor-pointer w-full',
+      type: 'password',
+      id: 'repeatpassword',
+      name: 'password',
+      label: 'Repeat Password',
+      class: 'block mt-4 mb-1 p-3 w-full',
       style: {
-        backgroundColor: '#41CD7D', 
+        backgroundColor: '#303246', 
         outline: 'none', 
+        color: 'white', 
         padding: '10px', 
         borderRadius: '10px' 
       }
