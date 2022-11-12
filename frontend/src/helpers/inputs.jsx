@@ -6,6 +6,8 @@ const inputs = [
       placeholder: 'jhondoe@gmail.com',
       label: 'Email',
       class: 'block p-3 w-full',
+      err: false,
+      errMsg: '',
       style: {
         backgroundColor: '#303246', 
         outline: 'none', 
@@ -22,6 +24,8 @@ const inputs = [
       placeholder: '************',
       label: 'Password',
       class: 'block p-3 w-full',
+      err: false,
+      errMsg: '',
       style: {
         backgroundColor: '#303246', 
         outline: 'none', 
@@ -39,6 +43,8 @@ const inputs1 = [
       placeholder: 'JhonDoe',
       label: 'Username',
       class: 'block p-3 w-full',
+      err: false,
+      errMsg: '',
       style: {
         backgroundColor: '#303246', 
         outline: 'none', 
@@ -55,6 +61,8 @@ const inputs1 = [
       placeholder: 'jhondoe@gmail.com',
       label: 'Email',
       class: 'block p-3 w-full',
+      err: false,
+      errMsg: '',
       style: {
         backgroundColor: '#303246', 
         outline: 'none', 
@@ -71,6 +79,8 @@ const inputs1 = [
       placeholder: '************',
       label: 'Password',
       class: 'block p-3 w-full',
+      err: false,
+      errMsg: '',
       style: {
         backgroundColor: '#303246', 
         outline: 'none', 
@@ -86,6 +96,8 @@ const inputs1 = [
       placeholder: '************',
       label: 'Repeat Password',
       class: 'block p-3 w-full',
+      err: false,
+      errMsg: '',
       style: {
         backgroundColor: '#303246', 
         outline: 'none', 

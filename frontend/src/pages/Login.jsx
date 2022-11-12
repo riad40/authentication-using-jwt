@@ -13,17 +13,38 @@ function Login({ inputs }) {
 
   const [err, setErr] = useState('')
 
+
   const { isAuth, setIsAuth } = useContext(AuthContext)
 
   const inputHandler = (e) => {
     setUser({...user, [e.target.id]: e.target.value})
   }
 
-  // console.log(document.cookie)
+  let frntErrs = false
+
+  const inputsValidation = () => {
+    if(user.email === '') {
+      inputs[0].err = true
+      inputs[0].errMsg = 'email is required'
+      frntErrs = true
+    } 
+    if(!user.email.match(/^[a-zA-Z0-9]+@[a-zA-Z0-9]+(\.[a-zA-Z0-9]{2,})+$/)) {
+      inputs[0].err = true
+      inputs[0].errMsg = 'invalid email format'
+      frntErrs = true
+    }
+    if(user.password === '') {
+      inputs[1].err = true
+      inputs[1].errMsg = 'Password is required'
+      frntErrs = true
+    }
+  }
 
   const login = (e) => {
 
     e.preventDefault()
+
+    inputsValidation()
 
     api.post('/auth/login', user, { withCredentials: true })
       .then((response) => {
@@ -41,17 +62,19 @@ function Login({ inputs }) {
         setErr(err.response.data.message)
       })
   }
+
   return (
     <>
       <FormContainer>
         <h1 className="block py-4 text-white text-2xl font-400 text-center text-color">Log In</h1>
         <form onSubmit={login} method="post">
-          <p className='text-center text-red-300'>{ err }</p>
+          <p className='text-center text-red-300'>{ !frntErrs && err }</p>
           {
             inputs.map((input) => (
               <>
                 <label for={input.id} className="font-medium my-2" style={ { display: 'block', color: 'rgb(138, 138, 138)' } }>{input.label}</label>
                 <input type={input.type} id={input.id} name={input.name} className={input.class} value={input.value} placeholder={input.placeholder} style={input.style} onChange={inputHandler} />
+                <p className='text-red-300'>{ input.err && input.errMsg }</p>
               </>
             )) 
           }
