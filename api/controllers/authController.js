@@ -227,6 +227,24 @@ exports.resetPassword = async (req, res, next) => {
     }  
 }
 
+// method : get
+// URL: api/auth/logout
+// access : public
+exports.logout = (req, res, next) => {
+    try {
+        res.clearCookie("accessToken")
+    } catch (err) {
+        next({
+            error: true,
+            status: 400,
+            message: err.message
+        })
+    }
+}
+
+// method : get
+// URL: api/auth/getRoles
+// access : public
 exports.getRoles = async (req, res, next) => {
     try {
         const role = await Role.find({ role: { $nin: ['manager'] } })
