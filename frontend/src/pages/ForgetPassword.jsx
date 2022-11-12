@@ -43,7 +43,7 @@ function ForgetPassword({ inputs }) {
             inputs.map((input) => (
               <>
                 <label for={input.id} className="font-medium my-2" style={ { display: 'block', color: 'rgb(138, 138, 138)' } }>{input.label}</label>
-                <input type={input.type} id={input.id} name={input.name} className={input.class} value={input.value} style={input.style} onChange={inputHandler} />
+                <input type={input.type} id={input.id} name={input.name} className={input.class} value={input.value} placeholder={input.placeholder} style={input.style} onChange={inputHandler} />
               </>
             )) 
           }

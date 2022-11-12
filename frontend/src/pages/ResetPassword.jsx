@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { api } from '../helpers/api'
 import FormContainer from '../components/FormContainer'
 
@@ -13,8 +13,11 @@ function ResetPassword({ inputs }) {
     setPwds({...pwds, [e.target.id]: e.target.value})
   }
 
+  const Navigate = useNavigate()
+
   const [err, setErr] = useState('')
   const [succ, setSucc] = useState('')
+  const [tru, setTru] = useState(false)
 
   const params = useParams()
 
@@ -25,11 +28,13 @@ function ResetPassword({ inputs }) {
     api.post(`/auth/resetpassword/${params.token}`, pwds)
       .then((response) => {
         setErr('')
-        setSucc(response.data.message)
+        setSucc('Password Changed Succefully, Redericting to log in . . . . .')
+        setTru(true)
       })
       .catch((err) => {
         setErr(err.response.data.message)
         setSucc('')
+        setTru(false)
       })
   }
 
@@ -44,12 +49,13 @@ function ResetPassword({ inputs }) {
             inputs.map((input) => (
               <>
                 <label for={input.id} className="font-medium my-2" style={ { display: 'block', color: 'rgb(138, 138, 138)' } }>{input.label}</label>
-                <input type={input.type} id={input.id} name={input.name} className={input.class} value={input.value} style={input.style} onChange={inputHandler} />
+                <input type={input.type} id={input.id} name={input.name} className={input.class} placeholder={input.placeholder} value={input.value} style={input.style} onChange={inputHandler} />
               </>
             )) 
           }
         </form>
       </FormContainer>
+      { tru && setTimeout(() => { Navigate('/login') }, 2000) }
     </>
   )
 }

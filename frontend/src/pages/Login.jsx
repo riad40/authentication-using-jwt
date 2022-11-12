@@ -46,19 +46,19 @@ function Login({ inputs }) {
   return (
     <>
       <FormContainer>
-        <h1 className="block py-4 text-white text-2xl font-400 text-center text-color underline">Log In</h1>
+        <h1 className="block py-4 text-white text-2xl font-400 text-center text-color">Log In</h1>
         <form onSubmit={login} method="post">
           <p className='text-center text-red-300'>{ err }</p>
           {
             inputs.map((input) => (
               <>
                 <label for={input.id} className="font-medium my-2" style={ { display: 'block', color: 'rgb(138, 138, 138)' } }>{input.label}</label>
-                <input type={input.type} id={input.id} name={input.name} className={input.class} value={input.value} style={input.style} onChange={inputHandler} />
+                <input type={input.type} id={input.id} name={input.name} className={input.class} value={input.value} placeholder={input.placeholder} style={input.style} onChange={inputHandler} />
               </>
             )) 
           }
           <div className="flex flex-col items-start mt-2 options">
-            <Link to="/forgetpassword" className="text-sm">Forget Password</Link>
+            <Link to="/forgetpassword" className="text-sm">Forget Password ?</Link>
           </div>
           <button type="submit" className='block my-5 text-dark font-medium cursor-pointer w-full' style={{ backgroundColor: '#41CD7D', outline: 'none', padding: '10px', borderRadius: '10px' }}>Submit</button>
           <div className="flex flex-col items-center py-3 options">

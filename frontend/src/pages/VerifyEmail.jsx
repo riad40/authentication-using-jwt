@@ -1,30 +1,39 @@
 import { api } from '../helpers/api'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
+import FormContainer from '../components/FormContainer'
 
 function VerifyEmail() {
 
     const [msg, setMsg] = useState('')
     const [err, setErr] = useState('')
+    const [tru, setTru] = useState(false)
 
     const params = useParams()
+
+    const Navigate = useNavigate()
 
     useEffect(() => {
       api.get(`/auth/register/verify/${params.token}`)
       .then((response) => {
-          console.log(response)
-          setMsg(response.data.message)
+          setMsg('Verefide Succefully, Redirecting to log in . . . . ')
+          setTru(true)
       }).catch((err) => {
-        console.log(err)
         setErr(err.response.data.message)
+        setTru(false)
       })
     })
     
   return (
     <>
-        <div style={{ color: "#fff" }}>{ msg }</div>
-        <div style={{ color: "red" }}>{ err }</div>
-        <Link to="/login" className='text-color'>login</Link>
+      <FormContainer>
+        <div className="p-5 text-center">
+          <div className='block' style={{ color: "#fff" }}>{ msg }</div>
+          <div className='block' style={{ color: "red" }}>{ err }</div>
+          <Link to="/login" className='text-color block'>login</Link>
+        </div>
+      </FormContainer>
+      { tru && setTimeout(() => { Navigate('/login') }, 2000) }
     </>
 
   )
