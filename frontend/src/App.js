@@ -6,7 +6,7 @@ import { inputs, inputs1, inputs2, inputs3} from './helpers/inputs'
 function App() {
 
   return (
-    <div className="App">
+    <>
       <AuthProvider>
         <Router>
           <Routes>
@@ -23,7 +23,7 @@ function App() {
           </Routes>
         </Router>
       </AuthProvider>
-    </div>
+    </>
   )
 }
 

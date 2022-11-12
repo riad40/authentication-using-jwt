@@ -9,8 +9,11 @@
   justify-content: center;
   height: 100vh;
 }
-body {
-  background-color: #282c34;
+.App1 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80vh;
 }
 .text-color {
   color: #41CD7D;
@@ -26,6 +29,3 @@ body {
   width: 500px;
   min-width: 300px;
 }
-
-
-
