@@ -68,21 +68,29 @@ exports.register = async (req, res, next) => {
 // access : public
 exports.verifyEmail = async (req, res, next) => {
 
-    const token = req.params.token
+    try {
+        const token = req.params.token
 
-    const userData = jwt.verify(token, process.env.JWT_SECRET)
-
-    User.updateOne({_id: userData._id }, { $set: { emailIsValid: true } })
-        .then(() => {
-            next({ 
-                error: false,
-                status: 200, 
-                message: 'verified' 
-            })
-        }).catch((err)=> {
-            console.log(err) && res.send('something went wrong '+err)
-        
-    })
+        const userData = jwt.verify(token, process.env.JWT_SECRET)
+    
+        User.updateOne({_id: userData._id }, { $set: { emailIsValid: true } })
+            .then(() => {
+                next({ 
+                    error: false,
+                    status: 200, 
+                    message: 'verified' 
+                })
+            }).catch((err)=> {
+                console.log(err) && res.send('something went wrong '+err)
+            
+        })
+    } catch (err) {
+        next({
+            error: true,
+            status: 400,
+            message: err.message
+        })
+    }
 }
 
 // method : post
