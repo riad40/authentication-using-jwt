@@ -218,3 +218,17 @@ exports.resetPassword = async (req, res, next) => {
         })
     }  
 }
+
+exports.getRoles = async (req, res, next) => {
+    try {
+        const role = await Role.find({ role: { $nin: ['manager'] } })
+        res.send({role})
+    } catch (err) {
+        next({
+            error: true,
+            status: 400,
+            message: err
+        })
+    }
+    
+}
