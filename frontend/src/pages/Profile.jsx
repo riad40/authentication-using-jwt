@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom'
 function Profile() {
 
   const [me, setMe] = useState('')
-  const [err, setErr ] = useState('')
+  const [err, setErr] = useState('')
   const Navigate = useNavigate()
 
   const { isAuth, setIsAuth } = useContext(AuthContext)
@@ -15,6 +15,7 @@ function Profile() {
   const role = isAuth.user.role
 
   const logout = () => {
+    console.log('log out');
     api.get(`/auth/logout`, {
       withCredentials: true
     }).then((response) => {
@@ -23,8 +24,8 @@ function Profile() {
           isLoggedIn: false
         })
       })
-      .catch((err) => {
-        setErr(err.response.data.message)
+      .catch((error) => {
+        setErr(error.response?.data?.message)
       })
   }
 

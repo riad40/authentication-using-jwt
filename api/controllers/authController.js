@@ -232,7 +232,9 @@ exports.resetPassword = async (req, res, next) => {
 // access : public
 exports.logout = (req, res, next) => {
     try {
-        res.clearCookie("accessToken")
+        res
+            .clearCookie("accessToken")
+            .send('log out succefully')
     } catch (err) {
         next({
             error: true,
