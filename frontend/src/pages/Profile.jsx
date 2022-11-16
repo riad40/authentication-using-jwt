@@ -1,5 +1,4 @@
-import { useState, useContext, useEffect } from 'react'
-import AuthContext from '../context/AuthContext'
+import { useState, useEffect } from 'react'
 import { api } from '../helpers/api'
 import FormContainer from '../components/FormContainer'
 import { useNavigate } from 'react-router-dom'
@@ -10,19 +9,14 @@ function Profile() {
   const [err, setErr] = useState('')
   const Navigate = useNavigate()
 
-  const { isAuth, setIsAuth } = useContext(AuthContext)
-
-  const role = isAuth.user.role
-
+  const role = localStorage.getItem('role')
+  
   const logout = () => {
-    console.log('log out');
     api.get(`/auth/logout`, {
       withCredentials: true
     }).then((response) => {
         Navigate('/')
-        setIsAuth({
-          isLoggedIn: false
-        })
+        localStorage.clear()
       })
       .catch((error) => {
         setErr(error.response?.data?.message)
@@ -30,6 +24,9 @@ function Profile() {
   }
 
   useEffect(() => {
+    if(role === null || undefined) {
+      logout()
+    }
     api.get(`/user/${role}/me`, {
       headers: {'set-cookie': document.cookie},
       withCredentials: true
@@ -38,6 +35,7 @@ function Profile() {
       })
       .catch((err) => {
         setErr(err.response.data.message)
+        logout()
       })
   })
     

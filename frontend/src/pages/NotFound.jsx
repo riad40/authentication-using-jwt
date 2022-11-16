@@ -1,7 +1,13 @@
+import FormContainer from '../components/FormContainer'
+
 function NotFound() {
+
   return (
-    <div className="text-center text-red-200">Page Not Found</div>
+    <FormContainer>
+      <div className="text-center text-red-200">404 Page Not Found</div>
+    </FormContainer>
   )
+
 }
 
 export default NotFound

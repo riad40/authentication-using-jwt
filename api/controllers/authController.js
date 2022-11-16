@@ -107,10 +107,10 @@ exports.login = async (req, res, next) => {
                 message: "Credintials are wrong"  
             })
         }
-        const token = jwt.sign({_id: user._id } , process.env.JWT_SECRET, { expiresIn: '24h' })
-        const role = await Role.findById({ _id: user.role[0] })
         if(user.email && await bcrypt.compare(req.body.password, user.password)) {
             if(user.emailIsValid) {
+                const token = jwt.sign({_id: user._id } , process.env.JWT_SECRET, { expiresIn: '24h' })
+                const role = await Role.findById({ _id: user.role[0] })
                 res
                     .cookie('accessToken', token, { httpOnly: false })
                     .json({ 
