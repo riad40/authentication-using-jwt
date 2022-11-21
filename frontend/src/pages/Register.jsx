@@ -82,7 +82,8 @@ function Register({ inputs }) {
                     { rolesErr && <p className='text-center text-red-300' >{ rolesErr }</p> }
                     <label for="role" className="font-medium my-2" style={{display: 'block', color: 'rgb(138, 138, 138)'} }>Select Role</label>
                     <select name="role" id='role' className='block p-3 w-full' style={{backgroundColor: '#303246', outline: 'none', color: 'white', padding: '10px', borderRadius: '10px', WebkitAppearance: 'none', MozAppearance: 'none' }} onChange={inputHandler} value={ user.role }>
-                        { 
+                        <option value="" selected="selected">Choose Role</option>
+                        {   
                             roles.map((role) => (
                                 <option value={ role.role }>{ role.role }</option>
                             ))
