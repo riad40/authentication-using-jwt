@@ -1,4 +1,5 @@
 require('dotenv').config()
+require('./config/init_db').setDefaultRoles()
 const db = require('./config/config_db')
 const express = require('express')
 const cors = require('cors')
