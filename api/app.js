@@ -33,3 +33,5 @@ const port = process.env.PORT
 app.listen(port, (err) => {
     !err ? console.log('app running on port ' + port) : console.log(err)
 })
+
+module.exports = app
