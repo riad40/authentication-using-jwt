@@ -37,7 +37,7 @@ describe("POST /api/auth/register", () => {
 
     describe("all or some of registration credintials is null", () => {
         
-        test("success", async () => {
+        test("error", async () => {
             body = {
                 username: "",
                 email: "",
