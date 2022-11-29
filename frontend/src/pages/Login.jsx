@@ -41,8 +41,8 @@ function Login({ inputs }) {
           {
             inputs.map((input) => (
               <>
-                <label for={input.id} className="font-medium my-2" style={ { display: 'block', color: 'rgb(138, 138, 138)' } }>{input.label}</label>
-                <input type={input.type} id={input.id} name={input.name} className={input.class} value={input.value} placeholder={input.placeholder} style={input.style} onChange={inputHandler} />
+                <label htmlFor={input.id} className="font-medium my-2" style={ { display: 'block', color: 'rgb(138, 138, 138)' } }>{input.label}</label>
+                <input type={input.type} id={input.id} name={input.name} className={input.class} value={input.value} placeholder={input.placeholder} data-testid={input.testid} style={input.style} onChange={inputHandler} />
                 <p className='text-red-300'>{ input.err && input.errMsg }</p>
               </>
             )) 

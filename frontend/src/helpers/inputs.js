@@ -8,6 +8,7 @@ const inputs = [
       class: 'block p-3 w-full',
       err: false,
       errMsg: '',
+      testid: 'emailInput',
       style: {
         backgroundColor: '#303246', 
         outline: 'none', 
@@ -26,6 +27,7 @@ const inputs = [
       class: 'block p-3 w-full',
       err: false,
       errMsg: '',
+      testid: 'pwdInput',
       style: {
         backgroundColor: '#303246', 
         outline: 'none', 

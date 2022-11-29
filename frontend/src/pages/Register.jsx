@@ -18,8 +18,6 @@ function Register({ inputs }) {
     const [roles, setRoles] = useState([])
     const [rolesErr, setRolesErr] = useState()
 
-    
-
     const inputHandler = (e) => {
         setUser({...user, [e.target.id]: e.target.value})
     }
@@ -32,7 +30,7 @@ function Register({ inputs }) {
         .catch((err) => {
             setRolesErr(err.response?.data?.message)
         })
-    }, [roles])
+    }, [])
 
     const register = (e) => {
         
