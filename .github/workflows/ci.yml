@@ -23,6 +23,7 @@ jobs:
       - run: npm test
   test-fronend:
     runs-on: ubuntu-latest
+    needs: [test-api]
     defaults:
       run: 
         working-directory: ./frontend
@@ -34,6 +35,7 @@ jobs:
     - run: npm test
   api-docker-image:
     runs-on: ubuntu-latest
+    needs: [test-api]
     steps:
       - uses: actions/checkout@v3
       - name: login to docker hub
@@ -49,6 +51,7 @@ jobs:
           tags: ${{ secrets.DOCKER_USERNAME }}/marhaba-auth-api:${{ github.sha }}
   frontend-docker-image:
     runs-on: ubuntu-latest
+    needs: [test-fronend]
     steps:
       - uses: actions/checkout@v3
       - name: login to docker hub
