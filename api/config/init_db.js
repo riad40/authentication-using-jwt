@@ -12,10 +12,6 @@ exports.setDefaultRoles = async (next) => {
             })
         }
     } catch(err) {
-        next({
-            error: true,
-            status: 400, 
-            message: "something went wrong " + err
-        })
+        process.exit(1)
     }
 }
