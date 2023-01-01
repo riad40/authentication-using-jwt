@@ -59,7 +59,7 @@ jobs:
           context: ./api
           push: true
           repository: new02blood/marhaba-auth
-          tags: api
+          tags: ${{ github.sha }}, api, latest
 
   build-frontend:
     runs-on: ubuntu-latest
@@ -83,5 +83,5 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: new02blood/marhaba-auth
-          tags: frontend
+          tags: ${{ github.sha }}, frontend, latest
 
