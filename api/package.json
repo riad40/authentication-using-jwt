@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "jest --verbose --runInBand --forceExit"
+    "test": "jest --forceExit"
   },
   "repository": {
     "type": "git",
