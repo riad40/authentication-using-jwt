@@ -62,5 +62,3 @@ jobs:
           context: ./frontend
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/marhaba-auth-frontend:${{ github.sha }}
-
-
