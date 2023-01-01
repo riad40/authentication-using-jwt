@@ -14,8 +14,8 @@ describe("POST /api/auth/register", () => {
         
         test("success", async () => {
             body = {
-                username: "trtretre",
-                email: "test1@gmail.com",
+                username: "trtretrehhhh",
+                email: "test1000000@gmail.com",
                 password: "kgiygluglulg",
                 role: ""
             }
