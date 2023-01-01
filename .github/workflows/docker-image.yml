@@ -14,24 +14,22 @@ jobs:
       PASSWORD: ${{ secrets.PASSWORD }}
     steps:
     - name: test api
-      uses: | 
-        actions/checkout@v3
-        actions/setup-node@v18
-      working-directory: ./api
-      run: |
-        npm install
-        npm test
+      - run : 
+        working-directory: ./api
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v18
+      - run: npm install
+      - run: npm test
   test-fronend:
     runs-on: ubuntu-latest
     steps:
     - name: test frontend
-      uses: |
-        actions/checkout@v3
-        actions/setup-node@v18
-      working-directory: ./frontend
-      run: |
-        npm install
-        npm test
+      -run: 
+        working-directory: ./frontend
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v18
+      - run: npm install
+      - run: npm test
   # docker-build-api:
   #   runs-on: ubuntu-latest
   #   steps:
